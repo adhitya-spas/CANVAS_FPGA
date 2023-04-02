@@ -1,6 +1,8 @@
 # canvas_algorithm
 canvas cubesat development!
 
+NOTE: This is an updated version of the code written by [James M Cannon](https://github.com/JamesMCannon/Canvas-Algorithm).
+
 this code is to run the canvas data processing algorthim that will be loaded onto the FPGA onboard CANVAS
 
 we used this code base to test the algorithm and run input data through this code and through the FPGA simulation, and see where there were differences
