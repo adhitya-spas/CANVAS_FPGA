@@ -1,0 +1,13 @@
+*.txt
+*.png
+*.csv
+output/*
+FPGA/*
+__pycache__/*
+canalg_env/*
+!requirements.txt
+.vs/*
+Hardware-Tests/__pycache__/*
+Hardware-Tests/Results/*
+!CANVAS_fbins/*
+!Inputs/*
