@@ -15,12 +15,12 @@ for more detail, contact the CANVAS team for payload documentation
 
 to install this repo into your computer: 
 ```
-git clone https://github.com/JamesMCannon/Canvas-Algorithm.git
+git clone [https://github.com/adhitya-spas/Canvas_FPGA.git]
 ```
 
 move into your newly cloned repo:
 ```
-cd canvas_algorithm
+cd Xanvas_FPGA
 ```
 
 and create a virtual environment:
@@ -41,4 +41,4 @@ and finally install packages
 pip install -r requirements.txt
 ```
 
-to run a test of the canvas alrgorithm, navigate to the ```fpgamodel.py``` and run that script with the desired input settings
+to run a test of the 2 channel canvas alrgorithm, navigate to the ```fpgamodel.py``` and run that script with the desired input settings
