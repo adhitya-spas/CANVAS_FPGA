@@ -77,77 +77,191 @@ pic_ser = serial.Serial("COM3",115200)
 pic_ser1 = serial.Serial("COM4",115200)
 FPGA_ser = serial.Serial("COM5",115200)
 
+### 5 Channel Inputs - Generate input signal from file or aribitrarily
+fromFile = True
+num = 1
+
+if fromFile:
+    inputs = 'Inputs/'
+    amp = "high-high_"
+    phase = "5deg"
+    f = "_03khz"
+    phase0 = "03khz"
+    file0 = inputs+"hi_amp_"+phase0+'.txt'
+    phase1 = "10khz"
+    file1 = inputs+"hi_amp_"+phase1+'.txt'
+    phase2 = "24khz"
+    file2 = inputs+"hi_amp_"+phase2+'.txt'
+    phase3 = "24khz"
+    file3 = inputs+"hi_amp_"+phase2+'.txt'
+    phase4 = "24khz"
+    file4 = inputs+"hi_amp_"+phase2+'.txt'
+    channels0_td = read_FPGA_input(file0,signed=True,show_plots=False)
+    channels1_td = read_FPGA_input(file1,signed=True,show_plots=False)
+    channels2_td = read_FPGA_input(file2,signed=True,show_plots=False)
+    channels3_td = read_FPGA_input(file3,signed=True,show_plots=False)
+    channels4_td = read_FPGA_input(file4,signed=True,show_plots=False)
+else: # Mostly redundant unless required
+    channels0_td = test_signal(fs, sample_len, signal_freq0, amp0, shift=shift0, channel_num=0, show_plots=False, save_output='both')
+    channels1_td = test_signal(fs, sample_len, signal_freq1, amp1, shift=shift1, channel_num=1, show_plots=False, save_output='both')
+    channels2_td = test_signal(fs, sample_len, signal_freq1, amp1, shift=shift1, channel_num=1, show_plots=False, save_output='both')
+    channels3_td = test_signal(fs, sample_len, signal_freq1, amp1, shift=shift1, channel_num=1, show_plots=False, save_output='both')
+    channels4_td = test_signal(fs, sample_len, signal_freq1, amp1, shift=shift1, channel_num=1, show_plots=False, save_output='both')
+if len(channels0_td) > 20480:
+    num_samples = 20480
+else:
+    num_samples = int(len(channels0_td))
+print(num_samples)
+
+test0 = channels0_td[0:num_samples]
+test1 = channels1_td[0:num_samples]
+test2 = channels2_td[0:num_samples]
+test3 = channels3_td[0:num_samples]
+test4 = channels4_td[0:num_samples]
+
+### Initialize Serial Ports
+pic_ser = serial.Serial("COM5",115200)
+pic_ser1 = serial.Serial("COM4",115200)
+pic_ser2 = serial.Serial("COM4",115200)
+FPGA_ser = serial.Serial("COM6",115200)
+
+
 ##
 ##
 ##      1 channel test
 ##
 ##
 
-# 1 - Generate input signal from file or aribitrarily           # HAVE TO CHANGE ONCE PARSER READY
-fromFile = True
-testmode = Spectra_Results
-num = 1
+# # 1 - Generate input signal from file or aribitrarily           # HAVE TO CHANGE ONCE PARSER READY
+# fromFile = True
+# testmode = Spectra_Results
+# num = 1
 
-print('1 channel test begin ->')
+# print('1 channel test begin ->')
 
-if fromFile:
-    inputs = 'Inputs/'
-    f = "512Hz"
-    amp = "hi_amp_"
-    file = inputs+amp+f+'.txt'  
-    channels0_td = read_FPGA_input(file,signed=True,show_plots=False)
-else:
-    channels0_td = test_signal(fs, sample_len, signal_freq0, amp0, shift=shift0, channel_num=0, show_plots=False, save_output='both')
-if len(channels0_td) > 20480:
-    num_samples = 20480
-else:
-    num_samples = int(len(channels0_td))
-print(num_samples)
-#num_samples = 11
-test = channels0_td[0:num_samples]
-#test = [i for i in range(num_samples)]
+# if fromFile:
+#     inputs = 'Inputs/'
+#     f = "512Hz"
+#     amp = "hi_amp_"
+#     file = inputs+amp+f+'.txt'  
+#     channels0_td = read_FPGA_input(file,signed=True,show_plots=False)
+# else:
+#     channels0_td = test_signal(fs, sample_len, signal_freq0, amp0, shift=shift0, channel_num=0, show_plots=False, save_output='both')
+# if len(channels0_td) > 20480:
+#     num_samples = 20480
+# else:
+#     num_samples = int(len(channels0_td))
+# print(num_samples)
+# #num_samples = 11
+# test = channels0_td[0:num_samples]
+# #test = [i for i in range(num_samples)]
 
-# 1 - initialize serial ports
-pic_ser = serial.Serial("COM4",115200)
-FPGA_ser = serial.Serial("COM5",512000)
+# # 1 - initialize serial ports
+# pic_ser = serial.Serial("COM4",115200)
+# FPGA_ser = serial.Serial("COM5",512000)
 
-#reset PIC
-time.sleep(0.5)
+# #reset PIC
+# time.sleep(0.5)
+# ser_write(pic_ser,ResetPIC+lf,True)
+# time.sleep(0.5)
+# #response_check(pic_ser,ack)
+# #print('Reset Received')
+# response_check(pic_ser,initiated)
+# print('PIC Reset')
+
+# #configure PIC
+# ser_write(pic_ser,SetConfig+testmode+lf)
+
+# #Wait for acknowledge
+# response_check(pic_ser,ack)
+# print('FPGA Configured')
+
+# #Set number of samples to be buffered
+# to_Send = num_samples.to_bytes(4,'big',signed=False)
+# ser_write(pic_ser,SetLength+to_Send+lf)
+
+# #Wait for acknowledge
+# response_check(pic_ser,ack)
+# print('Data Length Set')
+
+# #buffer data
+# t0=time.perf_counter()
+# var = 0
+# for i in test:
+#     val = i.to_bytes(2,byteorder='big',signed=True)
+#     ser_write(pic_ser,Data + val + delim + val + lf)
+#     if var%1000 == 0:
+#         print('buffering ', var)
+#     var = var+1
+#     #response_check(pic_ser,ack)
+
+# #check for complete from PIC
+# response_check(pic_ser,complete)
+
+
+
+#reset FPGA
+ser_write(FPGA_ser,Sync_Pat+SW_Reset,False)
+print('FPGA Reset')
+
+#reset PIC and flush FPGA Serial Port
 ser_write(pic_ser,ResetPIC+lf,True)
+ser_write(pic_ser1,ResetPIC+lf,True)
+
+FPGA_ser.close()
 time.sleep(0.5)
+FPGA_ser.open()
+
 #response_check(pic_ser,ack)
 #print('Reset Received')
 response_check(pic_ser,initiated)
-print('PIC Reset')
+print('PIC0 Reset')
+response_check(pic_ser1,initiated)
+print('PIC1 Reset')
 
-#configure PIC
-ser_write(pic_ser,SetConfig+testmode+lf)
-
-#Wait for acknowledge
-response_check(pic_ser,ack)
-print('FPGA Configured')
-
-#Set number of samples to be buffered
+#Set number of samples to be buffered on PIC0 (2 Channels - A1 and A2)
 to_Send = num_samples.to_bytes(4,'big',signed=False)
 ser_write(pic_ser,SetLength+to_Send+lf)
-
-#Wait for acknowledge
-response_check(pic_ser,ack)
+response_check(pic_ser,ack) #Wait for acknowledge
 print('Data Length Set')
 
 #buffer data
 t0=time.perf_counter()
 var = 0
-for i in test:
-    val = i.to_bytes(2,byteorder='big',signed=True)
-    ser_write(pic_ser,Data + val + delim + val + lf)
+for i in range(len(test0)):
+    val0 = test0[i].to_bytes(2,byteorder='big',signed=True)
+    val1 = test1[i].to_bytes(2,byteorder='big',signed=True)
+    ser_write(pic_ser,Data + val0 + delim + val1 + lf)
     if var%1000 == 0:
         print('buffering ', var)
     var = var+1
     #response_check(pic_ser,ack)
+response_check(pic_ser,complete) #check for complete from PIC
+del_t = time.perf_counter() - t0
+print('PIC0 Data buffered after %f seconds', del_t)
 
-#check for complete from PIC
-response_check(pic_ser,complete)
+#Set number of samples to be buffered on PIC1 (1 Channel - A3)
+to_Send = num_samples.to_bytes(4,'big',signed=False)
+ser_write(pic_ser1,SetLength+to_Send+lf)
+response_check(pic_ser1,ack) #Wait for acknowledge
+print('Data Length Set')
+
+    #buffer data
+    t0=time.perf_counter()
+    var = 0
+    for i in range(len(test0)):
+        val0 = test2[i].to_bytes(2,byteorder='big',signed=True)
+        val1 = test2[i].to_bytes(2,byteorder='big',signed=True)
+        ser_write(pic_ser1,Data + val0 + delim + val1 + lf)
+        if var%1000 == 0:
+            print('buffering ', var)
+        var = var+1
+        #response_check(pic_ser,ack)
+    response_check(pic_ser1,complete) #check for complete from PIC
+    del_t = time.perf_counter() - t0
+    print('PIC1 Data buffered after %f seconds', del_t)
+
+
 
 t1 = time.perf_counter()
 del_t = t1-t0

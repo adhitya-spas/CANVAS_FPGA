@@ -41,7 +41,8 @@ def save_output_txt(out_array, out_path, out_type, bits):
 def save_rotate(out_array, out_path, out_type):
     if out_type =='hex' or out_type =='both':
         out_name = out_path+'_hex.txt'
-
+        # if (os.path.exists(out_name)):
+        #     os.remove(out_name)    
         if not(os.path.exists(out_name)):
         #set up headers if file doesn't already exist
             with open(out_name, 'a') as output:
@@ -63,7 +64,8 @@ def save_rotate(out_array, out_path, out_type):
 
     if out_type == 'int' or out_type == 'both':
         out_name = out_path+'_int.txt'
-
+        # if (os.path.exists(out_name)):
+        #     os.remove(out_name)
         if not(os.path.exists(out_name)):
         #set up headers if file doesn't already exist
             with open(out_name, 'a') as output:

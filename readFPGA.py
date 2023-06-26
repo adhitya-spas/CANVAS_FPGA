@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # python functions to read FPGA input files (in hex)
 
-# ---------------------------- 2's comp (int to hex) ---------------------------------------------
+# ---------------------------- 2's comp (hex to int) ---------------------------------------------
 def twos_complement(hexstr,b):
     value = int(hexstr,16) # hex is base 16
     if value & (1 << (b-1)):
@@ -11,14 +11,17 @@ def twos_complement(hexstr,b):
     return value
 # ------------------------------------------------------------------------------------
 
-# ---------------------------- 2's comp (hex to int) ---------------------------------------------
+# ---------------------------- 2's comp (int to hex) ---------------------------------------------
 def twos_complement_to_hex(value):
-    # Converting value to be in terms of 32767 because -32767 to +32767 corresponds to -1 to +1 
-    value = value * 32767
-    c_value = round(value)
+    # Converting value to be in terms of 32767 because -32768 to +32767 corresponds to -1 to +1 
+    # value = value * 32767
+    # c_value = round(value)
 
     # Check if the value is negative
-    if c_value < 0:
+    if value < 0:
+        c_value = round(value * -32768)
+        hex_value = hex(c_value)
+        hex_value = hex_value.zfill(4)
         # Convert the absolute value to binary and remove the prefix '0b'
         binary_value = bin(abs(c_value))[2:]
         # Pad the binary value with zeros to make it 16 bits long
@@ -32,8 +35,15 @@ def twos_complement_to_hex(value):
         # Pad the hexadecimal value with zeros to make it 4 digits long
         hex_value = hex_value.zfill(4)
         # Add a minus sign to the hexadecimal value
-        hex_value = '-' + hex_value
+        hex_value = hex_value
+
+        # c_value = round(value * 32768)
+        # # If the value is non-negative, just convert it to hexadecimal format
+        # hex_value = hex(c_value)[2:]
+        # # Pad the hexadecimal value with zeros to make it 4 digits long
+        # hex_value = hex_value.zfill(4)
     else:
+        c_value = round(value * 32767)
         # If the value is non-negative, just convert it to hexadecimal format
         hex_value = hex(c_value)[2:]
         # Pad the hexadecimal value with zeros to make it 4 digits long
@@ -42,8 +52,38 @@ def twos_complement_to_hex(value):
     return hex_value
 
 # ------------------------------------------------------------------------------------
+def proper_twos_complement(value):
+    if value < 0:
+        c_value = round(value)
+        hex_value = hex(c_value)
+        hex_value = hex_value.zfill(4)
+        # Convert the absolute value to binary and remove the prefix '0b'
+        binary_value = bin(abs(c_value))[2:]
+        # Pad the binary value with zeros to make it 16 bits long
+        binary_value = binary_value.zfill(16)
+        # Invert all the bits in the binary value
+        inverted_binary_value = ''.join(['1' if b == '0' else '0' for b in binary_value])
+        # Convert the inverted binary value to an integer and add 1
+        inverted_decimal_value = int(inverted_binary_value, 2) + 1
+        # Convert the decimal value to hexadecimal format
+        hex_value = hex(inverted_decimal_value)[2:]
+        # Pad the hexadecimal value with zeros to make it 4 digits long
+        hex_value = hex_value.zfill(4)
+        # Add a minus sign to the hexadecimal value
+        hex_value = hex_value
 
-
+        # c_value = round(value * 32768)
+        # # If the value is non-negative, just convert it to hexadecimal format
+        # hex_value = hex(c_value)[2:]
+        # # Pad the hexadecimal value with zeros to make it 4 digits long
+        # hex_value = hex_value.zfill(4)
+    else:
+        c_value = round(value)
+        # If the value is non-negative, just convert it to hexadecimal format
+        hex_value = hex(c_value)[2:]
+        # Pad the hexadecimal value with zeros to make it 4 digits long
+        hex_value = hex_value.zfill(4)
+    return hex_value
 # ---------------------------- read FPGA input ---------------------------------------
 def read_FPGA_input(file, b=16, signed=True, show_plots=False):
     f = open(file, 'r')

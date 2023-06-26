@@ -45,10 +45,20 @@ n_acc = 8                   # number of FFTs to accummulate
 inputs = 'Inputs/'
 freq = '_03khz'
 phase = "5deg"
-file0 = inputs + 'high-high_'+'0deg'+freq+'.txt'
-file1 = inputs +  'high-high_' + phase + freq + '.txt' 
+# file0 = inputs + 'high-high_'+'0deg'+freq+'.txt'
+# file1 = inputs +  'high-high_' + phase + freq + '.txt' 
+# channels0_td = read_FPGA_input(file0,signed=True,show_plots=False)
+# channels1_td = read_FPGA_input(file1,signed=True,show_plots=False)
+# channels2_td = read_FPGA_input(file2,signed=True,show_plots=False)
+phase0 = "03khz"
+file0 = inputs+"mid_amp_"+phase0+'.txt'
+phase1 = "10khz"
+file1 = inputs+"mid_amp_"+phase1+'.txt'
+phase2 = "24khz"
+file2 = inputs+"mid_amp_"+phase2+'.txt'
 channels0_td = read_FPGA_input(file0,signed=True,show_plots=False)
 channels1_td = read_FPGA_input(file1,signed=True,show_plots=False)
+channels2_td = read_FPGA_input(file2,signed=True,show_plots=False)
 
 #--------------------------------------David's code--------------------------------
 
@@ -56,7 +66,8 @@ channels1_td = read_FPGA_input(file1,signed=True,show_plots=False)
 ## Input signal
 #################
 
-Npts   = len(channels0_td) #1000
+#Npts   = len(channels0_td) #1000
+Npts   = 20480 #1000
 
 f      = 1e3
 time   = np.arange(0,Npts) / Npts * 10
@@ -65,9 +76,10 @@ amp    = 5
 #################
 ## Input case 1 (rotate x to y)
 #################
-input1 = channels0_td #input1 = np.sin(2 * np.pi * time) * amp
-input2 = channels1_td #input2 = np.zeros(Npts)
-input3 = channels0_td #input3 = np.zeros(Npts)
+num_samples = 20480
+input1 = channels0_td[0:num_samples] #input1 = np.sin(2 * np.pi * time) * amp
+input2 = channels1_td[0:num_samples] #input2 = np.zeros(Npts)
+input3 = channels2_td[0:num_samples] #input3 = np.zeros(Npts)
 
 ## Diagnostic 
 plt.plot(time, input1)
@@ -76,10 +88,10 @@ plt.plot(time, input3)
 plt.show()
 
 ## Rotation matrix from x to y (90 deg about z, counter-clockwise)
-theta         = 270 * np.pi / 180
-x_to_y_matrix = np.array( [ [np.cos(theta), -np.sin(theta), 0], 
-                            [np.sin(theta),  np.cos(theta), 0], 
-                            [            0,              0, 1] ] )
+theta         = (45) * np.pi / 180
+about_z       = np.array( [ [np.cos(theta), -np.sin(theta), 0], 
+                                    [np.sin(theta),  np.cos(theta), 0], 
+                                    [            0,              0, 1] ] )
 
 ## Input array [N x 3]
 input_array = np.zeros([len(input1),3])
@@ -88,10 +100,11 @@ input_array[:,1] = input2
 input_array[:,2] = input3
 
 ## Apply rotatation to each point
-output = np.matmul(input_array, x_to_y_matrix)
+output = np.matmul(input_array, about_z)
+output = np.transpose(output)
 
 ## Diagnostic 
-plt.plot(time, output[:,0])
+#plt.plot(time, output[:,0])
 plt.plot(time, output[:,1])
 plt.plot(time, output[:,2])
 plt.show()
@@ -121,9 +134,9 @@ print ('')
 
 ## Writing into text file for verification - Test 1
 file = open('test_1.txt','w')
-file.write("I/P 1"+"\t\t\t"+"I/P 2"+"\t\t\t"+"I/P 3"+"\t\t\t"+"O/P 1"+"\t\t\t"+"O/P 2"+"\t\t\t"+"O/P 3"+"\n")
+file.write("R3"+"\t"+"R2"+"\t"+"R1"+"\t"+"A3"+"\t"+"A2"+"\t"+"A1"+"\n")
 for a in range(0,len(output[:,0])):
-    file.write(str(input_array[a,0])+"\t\t\t"+str(input_array[a,1])+"\t\t\t"+str(input_array[a,2])+"\t\t\t"+str(output[a,0])+"\t\t\t"+str(output[a,1])+"\t\t\t"+str(output[a,2])+"\n")
+    file.write(str(int(output[a,2]))+"\t"+str(int(output[a,1]))+"\t"+str(int(output[a,0]))+"\t"+str(int(input_array[a,2]))+"\t"+str(int(input_array[a,1]))+"\t"+str(int(input_array[a,0]))+"\n")
 #    file.write(str(input_array[a,0])+"\t\t\t"+str(input_array[a,1])+"\t\t\t"+str(input_array[a,2])+"\t\t\t"+str(output[a,0])+"\t\t\t"+str(output[a,1])+"\t\t\t"+str(output[a,2])+"\n")
 file.close()
 
@@ -131,20 +144,32 @@ file.close()
 ## Input case 2 (rotate y to z)
 #################
 
-## Rotation matrix from y to z (90 deg about x) (90 deg about z, counter-clockwise)
-theta         = 90 * np.pi / 180
-y_to_z_matrix = np.array( [ [1,             0,              0], 
-                            [0, np.cos(theta), -np.sin(theta)], 
-                            [0, np.sin(theta),  np.cos(theta)] ] )
+# ## Rotation matrix from y to z (90 deg about x) (90 deg about z, counter-clockwise)
+# theta         = 90 * np.pi / 180
+# y_to_z_matrix = np.array( [ [1,             0,              0], 
+#                             [0, np.cos(theta), -np.sin(theta)], 
+#                             [0, np.sin(theta),  np.cos(theta)] ] )
 
 ## Input array [N x 3]
 input_array = np.zeros([len(input1),3])
-input_array[:,0] = input2
-input_array[:,1] = input1
+input_array[:,0] = input1
+input_array[:,1] = input2
 input_array[:,2] = input3
 
+theta          = (360-25) * np.pi / 180
+about_x_matrix = np.array( [ [1,             0,              0], 
+                            [0, np.cos(theta), -np.sin(theta)], 
+                            [0, np.sin(theta),  np.cos(theta)] ] )
+
+
 ## Apply rotatation to each point
-output2 = np.matmul(input_array, y_to_z_matrix)
+output_mid = np.matmul(input_array, about_x_matrix)
+
+theta          = (360-43) * np.pi / 180
+about_y       = np.array( [ [ np.cos(theta),  0, np.sin(theta)], 
+                                    [             0,  1,             0], 
+                                    [-np.sin(theta),  0, np.cos(theta)] ] )
+output2 = np.matmul(output_mid, about_y)
 
 ## Diagnostic 
 plt.plot(time, output2[:,0])
@@ -160,7 +185,7 @@ print('Test 2 (rotation about x')
 print('===================')
 print('')
 print('Rotation Matrix:')
-print(y_to_z_matrix)
+#print(y_to_z_matrix)
 print('')
 print('Input Amps')
 print(np.max(input_array[:,0]))
@@ -177,9 +202,9 @@ print ('')
 
 ## Writing into text file for verification - Test 2
 file = open('test_2.txt','w')
-file.write("I/P 1"+"\t\t\t"+"I/P 2"+"\t\t\t"+"I/P 3"+"\t\t\t"+"O/P 1"+"\t\t\t"+"O/P 2"+"\t\t\t"+"O/P 3"+"\n")
+file.write("R3"+"\t"+"R2"+"\t"+"R1"+"\t"+"A3"+"\t"+"A2"+"\t"+"A1"+"\n")
 for a in range(0,len(output2[:,0])):
-    file.write(str(input_array[a,0])+"\t\t\t"+str(input_array[a,1])+"\t\t\t"+str(input_array[a,2])+"\t\t\t"+str(output2[a,0])+"\t\t\t"+str(output2[a,1])+"\t\t\t"+str(output2[a,2])+"\n")
+    file.write(str(int(output2[a,2]))+"\t"+str(int(output2[a,1]))+"\t"+str(int(output2[a,0]))+"\t"+str(int(input_array[a,2]))+"\t"+str(int(input_array[a,1]))+"\t"+str(int(input_array[a,0]))+"\n")
 file.close()
 
 #################
@@ -189,7 +214,7 @@ file.close()
 ## Input array [N x 3]
 input_array = np.zeros([len(input1),3])
 input_array[:,0] = input1 # * np.cos(35 / 180 * np.pi)
-input_array[:,1] = input1 # * np.sin(35 / 180 * np.pi)
+input_array[:,1] = input2 # * np.sin(35 / 180 * np.pi)
 input_array[:,2] = input3
 
 
@@ -312,7 +337,7 @@ full_3D_rot = np.matmul(full_3D_rot, about_y)
 ## Input array [N x 3]
 input_array = np.zeros([len(input1),3])
 input_array[:,0] = input1 # * np.cos(35 / 180 * np.pi)
-input_array[:,1] = input1 # * np.sin(35 / 180 * np.pi)
+input_array[:,1] = input2 # * np.sin(35 / 180 * np.pi)
 input_array[:,2] = input3
 
 ## Apply rotatation to each point
@@ -360,9 +385,9 @@ leg = plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left', borderaxespad=0.)
 
 ## Writing into text file for verification - Test 3
 file = open('test_3.txt','w')
-file.write("I/P 1"+"\t\t\t"+"I/P 2"+"\t\t\t"+"I/P 3"+"\t\t\t"+"O/P 1"+"\t\t\t"+"O/P 2"+"\t\t\t"+"O/P 3"+"\n")
+file.write("R3"+"\t"+"R2"+"\t"+"R1"+"\t"+"A3"+"\t"+"A2"+"\t"+"A1"+"\n")
 for a in range(0,len(output5[:,0])):
-    file.write(str(input_array[a,0])+"\t\t\t"+str(input_array[a,1])+"\t\t\t"+str(input_array[a,2])+"\t\t\t"+str(output5[a,0])+"\t\t\t"+str(output5[a,1])+"\t\t\t"+str(output5[a,2])+"\n")
+    file.write(str(int(output5[a,2]))+"\t"+str(int(output5[a,1]))+"\t"+str(int(output5[a,0]))+"\t"+str(int(input_array[a,2]))+"\t"+str(int(input_array[a,1]))+"\t"+str(int(input_array[a,0]))+"\n")
 file.close()
 
 #--------------------------------End of David's code-------------------------------
