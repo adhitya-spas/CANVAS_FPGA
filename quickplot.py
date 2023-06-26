@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 show_plots = False
 
 file_path = "./Data_compare/"
-f = "512hz"
+f = "03khz"
 fpga_rev = "Rev14p1"
 amp = "hi_amp_" #valid options are hi_amp, low_amp, and mid_amp
 
