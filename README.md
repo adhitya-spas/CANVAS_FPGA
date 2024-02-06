@@ -20,7 +20,7 @@ git clone [https://github.com/adhitya-spas/Canvas_FPGA.git]
 
 move into your newly cloned repo:
 ```
-cd Xanvas_FPGA
+cd Canvas_FPGA
 ```
 
 and create a virtual environment:
